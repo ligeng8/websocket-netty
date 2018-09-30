@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
+//https://github.com/ityouknow/spring-examples
 public class Client {
 
 	private static int DEFAULT_SERVER_PORT = 1234;
@@ -31,7 +31,8 @@ public class Client {
 			while (true) {
 				System.out.println("____½á¹ûÎª£º" + in.readLine());
 			}
-		} catch (Exception e) {
+		} catch (Exception e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
