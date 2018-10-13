@@ -110,7 +110,7 @@ public class TimeClient implements Runnable {
 					if(body.equals("sur success")) {
 						return;
 					}
-					sub(sc, new Random().nextInt()+"");
+					sub(sc, "sur="+new Random().nextInt()+"");
 				} else if (readBytes < 0) {
 					key.cancel();
 					selector.close();// ¶Ô¶ËÁ´Â·¹Ø±Õ
