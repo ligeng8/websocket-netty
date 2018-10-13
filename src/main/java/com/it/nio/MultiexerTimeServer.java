@@ -11,7 +11,9 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.util.CharsetUtil;
 
@@ -22,6 +24,8 @@ public class MultiexerTimeServer implements Runnable {
 	private ServerSocketChannel servChannel;
 
 	private volatile boolean stop = false;
+	
+	private ConcurrentHashMap<String, SocketChannel> all = new ConcurrentHashMap<>();
 
 	public void setStop(boolean stop) {
 		this.stop = stop;
@@ -101,16 +105,39 @@ public class MultiexerTimeServer implements Runnable {
 					 byte[] bytes =	 new byte[readBuffer.remaining()];
 					 readBuffer.get(bytes);
 					 String body = new String(bytes,CharsetUtil.UTF_8);
+					
 					 System.out.println("time server recevice order :"+ body);
-					 String currentTime = "QUERY TIME ORDER".equalsIgnoreCase(body)?new Date().toLocaleString() : "BAD ORDER";
-					 dowrite(sc, currentTime);
-						servChannel.register(selector, SelectionKey.OP_ACCEPT);
+					 
+					 if("QUERY TIME ORDER".equalsIgnoreCase(body)) {
+						 String currentTime = new Date().toLocaleString() ;
+						 dowrite(sc, currentTime);
+					 }else {
+						 all.put(body, sc);
+						 dowrite(sc, "sur success");
+					 }
+//						servChannel.register(selector, SelectionKey.OP_ACCEPT);
 				 }else if(read == -1) { //返回值为-1 链路已经关闭，需要关闭SocketChannel，释放资源
 					 key.cancel();
 					 sc.close();
 				 }else {//返回值等于0 没有读到字节，属于正常现象，忽略
 					 
 				 }
+			}
+		}
+	}
+	
+	
+	public void publishAll() {
+		Set<Entry<String, SocketChannel>>  entrys = this.all.entrySet();
+		for (Entry<String, SocketChannel> entry : entrys) {
+			String key = entry.getKey();
+			SocketChannel value = entry.getValue(); 
+			String response = key + value;
+			try {
+				dowrite(value, response);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

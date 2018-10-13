@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 import io.netty.util.CharsetUtil;
@@ -92,6 +93,7 @@ public class TimeClient implements Runnable {
 			if (key.isConnectable()) {
 				if (sc.finishConnect()) {
 					sc.register(selector, SelectionKey.OP_READ);
+					dowrite( sc);
 				} else {
 					System.exit(1); // 连接失败，进程退出
 				}
@@ -104,7 +106,11 @@ public class TimeClient implements Runnable {
 					readbuffer.get(bytes);
 					String body = new String(bytes, CharsetUtil.UTF_8);
 					System.out.println("Now is :" + body);
-					this.stop = true;
+//					this.stop = true;
+					if(body.equals("sur success")) {
+						return;
+					}
+					sub(sc, new Random().nextInt()+"");
 				} else if (readBytes < 0) {
 					key.cancel();
 					selector.close();// 对端链路关闭
@@ -125,6 +131,18 @@ public class TimeClient implements Runnable {
 		}
 	}
 
+	
+	
+	public void sub(SocketChannel sc,String subr) throws IOException {
+		byte[] bytes = subr.getBytes();
+		ByteBuffer writeBuffer = ByteBuffer.allocate(bytes.length);
+		writeBuffer.put(bytes);
+		writeBuffer.flip();
+		sc.write(writeBuffer);
+		if (!writeBuffer.hasRemaining()) {
+			System.out.println("send order to server success");
+		}
+	}
 	public void dowrite(SocketChannel sc) throws IOException {
 		byte[] bytes = "QUERY TIME ORDER".getBytes();
 		ByteBuffer writeBuffer = ByteBuffer.allocate(bytes.length);
