@@ -1,0 +1,11 @@
+syntax = "proto2";
+option java_package="com.it.netty.xuliehua.googleprotobuf";
+option java_outer_classname="SubscribeReqProto";
+
+message SubscribeReq{
+        required int32 subReqId = 1;
+        required string userName = 2;
+        required string productName = 3;
+        repeated string address = 4;
+}
+D:\>protoc -I=e:\test_protoc --java_out=e:\test_protoc SubscribeReq.proto
